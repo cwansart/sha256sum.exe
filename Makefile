@@ -2,7 +2,7 @@
 CC = cl
 
 # Flags for the compiler
-CFLAGS = /W4 /MT
+CFLAGS = /W4 /MT /O2
 
 # Include and lib directories for OpenSSL
 OPENSSL_INCLUDE_DIR = include
@@ -27,6 +27,14 @@ $(OUTFILE): $(OBJECTS)
 # Compilation rule
 .c.obj:
     $(CC) $(CFLAGS) /c $< /Fo$@ /I "$(OPENSSL_INCLUDE_DIR)"
+
+# Assembly output with optimization
+# asm-optimized: $(SOURCES)
+#     $(CC) /FAs /O2 /c $(SOURCES) /Foasm-optimized.obj /I "$(OPENSSL_INCLUDE_DIR)"
+
+# Assembly output without optimization
+# asm-unoptimized: $(SOURCES)
+#     $(CC) /FAs /c $(SOURCES) /Foasm-unoptimized.obj /I "$(OPENSSL_INCLUDE_DIR)"
 
 # Clean rule
 clean:
