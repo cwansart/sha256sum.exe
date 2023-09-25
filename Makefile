@@ -8,7 +8,7 @@ CFLAGS = /W4 /MD /O2
 OUTFILE = sha256sum.exe
 
 # Source files
-SOURCES = main.c
+SOURCES = main.c args.c sha256.c
 
 # Object files (one per source file)
 OBJECTS = $(SOURCES:.c=.obj)

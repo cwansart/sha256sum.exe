@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "sha256.h": "c",
+        "wchar.h": "c",
+        "args.h": "c"
+    }
+}
