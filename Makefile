@@ -2,7 +2,7 @@
 CC = cl
 
 # Flags for the compiler
-CFLAGS = /W4 /MT /O2
+CFLAGS = /W4 /MD /O2
 
 # Name of the final executable
 OUTFILE = sha256sum.exe
