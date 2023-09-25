@@ -4,10 +4,6 @@ CC = cl
 # Flags for the compiler
 CFLAGS = /W4 /MT /O2
 
-# Include and lib directories for OpenSSL
-OPENSSL_INCLUDE_DIR = include
-OPENSSL_LIB_DIR = lib
-
 # Name of the final executable
 OUTFILE = sha256sum.exe
 
@@ -22,11 +18,11 @@ all: $(OUTFILE)
 
 # Linking rule
 $(OUTFILE): $(OBJECTS)
-    $(CC) $(CFLAGS) /Fe$@ $(OBJECTS) /link /LIBPATH:"$(OPENSSL_LIB_DIR)"
+    $(CC) $(CFLAGS) /Fe$@ $(OBJECTS) /link
 
 # Compilation rule
 .c.obj:
-    $(CC) $(CFLAGS) /c $< /Fo$@ /I "$(OPENSSL_INCLUDE_DIR)"
+    $(CC) $(CFLAGS) /c $< /Fo$@
 
 # Clean rule
 clean:
