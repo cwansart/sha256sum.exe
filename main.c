@@ -1,28 +1,85 @@
-#include "args.h"
-#include "sha256.h"
+#include "sha256sum.h"
 
-int wmain(int argc, wchar_t *argv[])
+#define MAJOR_VERSION 2
+#define MINOR_VERSION 0
+#define PATCH_VERSION 0
+
+int run(int argc, LPWSTR argv[])
 {
-  wchar_t *shasums_file = NULL;
+    Args args = { 0 };
+    ErrorCode parse_result = parse_args(&args, argc, argv);
 
-  errno_t parse_result = parse_args(argc, argv, &shasums_file);
-  if (parse_result != OK)
-  {
-    return 1;
-  }
-
-  // just print checksum
-  if (shasums_file == NULL)
-  {
-    wchar_t *file_hash = calc_hash(argv[1]);
-    if (file_hash != NULL)
+    // error handling from argument parsing
+    switch (parse_result)
     {
-      wprintf(L"%ls %ls\n", file_hash, argv[1]);
+    case PARSE_ARGS_MISSING_PARAMETER:
+    case PARSE_ARGS_MISSING_SHASUMS_FILE:
+    case PARSE_ARGS_ALLOCATE_ERROR:
+        return parse_result;
     }
-  }
-  // check SHASUMS
-  else
-  {
-    wprintf(L"to be implemented");
-  }
+
+    // show application version
+    if (args.show_version)
+    {
+        wprintf(L"%ls version %ld.%ld.%ld\n", argv[0], MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION);
+        return SUCCESS;
+    }
+
+    // since WinAPI only reads binary we don't support text mode
+    if (args.text_mode)
+    {
+        wprintf(L"%ls only supports binary mode\n", argv[0]);
+        return SUCCESS;
+    }
+
+    // run check on checksum file
+    if (args.sum_file != NULL)
+    {
+        return check_sums(&args);
+    }
+
+    // handle all FILE parameters
+    if (args.files != NULL)
+    {
+        FileList* current = args.files;
+        while (current != NULL)
+        {
+            WIN32_FIND_DATA findFileData;
+            HANDLE hFind = FindFirstFile(current->file, &findFileData);
+
+            if (hFind == INVALID_HANDLE_VALUE)
+            {
+                wprintf(L"failed to find files for argument '%ls' with error %d\n", current->file, GetLastError());
+                FindClose(hFind);
+                return MAIN_FAILED_TO_FIND_FILES;
+            }
+
+            do
+            {
+                ErrorCode printHashStatus = print_hash(&args, findFileData.cFileName);
+                if (printHashStatus != SUCCESS)
+                {
+                    FindClose(hFind);
+                    return printHashStatus;
+                }
+            } while (FindNextFile(hFind, &findFileData) != 0);
+
+            FindClose(hFind);
+
+            current = current->next;
+        }
+        return SUCCESS;
+    }
+
+    return SUCCESS;
+}
+
+int wmain(int argc, LPWSTR argv[])
+{
+#ifdef _UNITTESTS
+    BOOL run_tests();
+    return run_tests();
+#else
+    return run(argc, argv);
+#endif // _UNITTESTS
 }
