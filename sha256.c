@@ -16,7 +16,7 @@ typedef struct file_hash_t
     struct file_hash_t* next;
 } FileHash;
 
-void rem_binary_prefix(LPWSTR str)
+void RemoveBinaryPrefix(LPWSTR str)
 {
     if (str[0] == L'*')
     {
@@ -28,7 +28,7 @@ void rem_binary_prefix(LPWSTR str)
     }
 }
 
-ErrorCode calc_hash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
+ErrorCode CalcHash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
 {
     ErrorCode status = SUCCESS;
     HANDLE hFile;
@@ -44,7 +44,7 @@ ErrorCode calc_hash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
     PBYTE pbHashObject = NULL;
     PBYTE pbHash = NULL;
 
-    rem_binary_prefix(file);
+    RemoveBinaryPrefix(file);
 
     // open file
     hFile = CreateFileW(file,                  // File name
@@ -227,10 +227,10 @@ Cleanup:
     return status;
 }
 
-ErrorCode print_hash(__in Args* args, __in LPWSTR file)
+ErrorCode PrintHash(__in Args* args, __in LPWSTR file)
 {
     LPWSTR hash = NULL;
-    ErrorCode ok = calc_hash(args, &hash, file);
+    ErrorCode ok = CalcHash(args, &hash, file);
     if (hash != NULL && ok == SUCCESS)
     {
         wprintf(L"%ls *%ls\n", hash, file);
@@ -238,7 +238,7 @@ ErrorCode print_hash(__in Args* args, __in LPWSTR file)
     return ok;
 }
 
-ErrorCode parse_line(__in Args* args, __out FileHash* fh, __in int line_num, __in LPWSTR line)
+ErrorCode ParseLine(__in Args* args, __out FileHash* fh, __in int line_num, __in LPWSTR line)
 {
     LPWSTR tokContext = NULL;
     LPWSTR delim = L" ";
@@ -275,7 +275,7 @@ ErrorCode parse_line(__in Args* args, __out FileHash* fh, __in int line_num, __i
     return SUCCESS;
 }
 
-ErrorCode check_sums(__in Args* args)
+ErrorCode VerifyChecksums(__in Args* args)
 {
     ErrorCode status = SUCCESS;
     HANDLE hFile = NULL;
@@ -288,7 +288,7 @@ ErrorCode check_sums(__in Args* args)
     FileHash* current = NULL;
 
     // open file
-    hFile = CreateFileW(args->sum_file,        // File name
+    hFile = CreateFileW(args->sumFile,        // File name
                         GENERIC_READ,          // Open for reading
                         0,                     // No sharing
                         NULL,                  // Default security
@@ -371,7 +371,7 @@ ErrorCode check_sums(__in Args* args)
                 }
                 else
                 {
-                    ErrorCode parseResult = parse_line(args, fh, lineNum, wideBuffer);
+                    ErrorCode parseResult = ParseLine(args, fh, lineNum, wideBuffer);
                     if (parseResult != SUCCESS)
                     {
                         free(fh);
@@ -442,7 +442,7 @@ ErrorCode check_sums(__in Args* args)
         }
         else
         {
-            ErrorCode parseResult = parse_line(args, fh, lineNum, wideBuffer);
+            ErrorCode parseResult = ParseLine(args, fh, lineNum, wideBuffer);
             if (parseResult != SUCCESS)
             {
                 free(fh);
@@ -478,7 +478,7 @@ ErrorCode check_sums(__in Args* args)
     while (current != NULL)
     {
         LPWSTR file_hash = NULL;
-        ErrorCode calcResult = calc_hash(args, &file_hash, current->file);
+        ErrorCode calcResult = CalcHash(args, &file_hash, current->file);
         if (calcResult != SUCCESS)
         {
             status = calcResult;

@@ -54,12 +54,12 @@ typedef struct file_list
 typedef struct prog_args
 {
     FileList* files;
-    LPWSTR sum_file;
+    LPWSTR sumFile;
     BOOL quiet;
     BOOL status;
     BOOL warn;
-    BOOL show_version;
-    BOOL text_mode;
+    BOOL showVersion;
+    BOOL textMode;
 } Args;
 
 // this is required for CppUnitTestFramework
@@ -67,10 +67,11 @@ typedef struct prog_args
 extern "C" {
 #endif
 
-ErrorCode parse_args(__out Args*, __in int, __in LPWSTR[]);
+ErrorCode ParseArgs(__out Args*, __in int, __in LPWSTR[]);
 
-ErrorCode print_hash(__in Args* args, __in LPWSTR);
-ErrorCode check_sums(__in Args*);
+ErrorCode CalcHash(__in Args*, __out LPWSTR*, __in LPWSTR);
+ErrorCode PrintHash(__in Args*, __in LPWSTR);
+ErrorCode VerifyChecksums(__in Args*);
 
 #ifdef __cplusplus
 }

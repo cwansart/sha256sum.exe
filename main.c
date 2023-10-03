@@ -7,7 +7,7 @@
 int run(int argc, LPWSTR argv[])
 {
     Args args = { 0 };
-    ErrorCode parse_result = parse_args(&args, argc, argv);
+    ErrorCode parse_result = ParseArgs(&args, argc, argv);
 
     // error handling from argument parsing
     switch (parse_result)
@@ -19,23 +19,23 @@ int run(int argc, LPWSTR argv[])
     }
 
     // show application version
-    if (args.show_version)
+    if (args.showVersion)
     {
         wprintf(L"%ls version %d.%d.%d\n", argv[0], MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION);
         return SUCCESS;
     }
 
     // since WinAPI only reads binary we don't support text mode
-    if (args.text_mode)
+    if (args.textMode)
     {
         wprintf(L"%ls only supports binary mode\n", argv[0]);
         return SUCCESS;
     }
 
     // run check on checksum file
-    if (args.sum_file != NULL)
+    if (args.sumFile != NULL)
     {
-        return check_sums(&args);
+        return VerifyChecksums(&args);
     }
 
     // handle all FILE parameters
@@ -55,7 +55,7 @@ int run(int argc, LPWSTR argv[])
 
             do
             {
-                ErrorCode printHashStatus = print_hash(&args, findFileData.cFileName);
+                ErrorCode printHashStatus = PrintHash(&args, findFileData.cFileName);
                 if (printHashStatus != SUCCESS)
                 {
                     FindClose(hFind);
