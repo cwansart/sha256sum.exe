@@ -59,7 +59,7 @@ ErrorCode calc_hash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
         if (!args->status)
         {
             wchar_t errorMsg[MAX_PATH + 50];
-            wsprintfW(errorMsg, L"failed to open file '%ls' with error: %d\r\n", file, GetLastError());
+            wsprintfW(errorMsg, L"failed to open file '%ls' with error: %lu\r\n", file, GetLastError());
             WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), errorMsg, lstrlenW(errorMsg), NULL, NULL);
         }
         status = CALC_HASH_FAILED_TO_OPEN_FILE;
@@ -71,7 +71,7 @@ ErrorCode calc_hash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
     {
         if (!args->status)
         {
-            printf("open an algorithm handle failed: %x\n", hashStatus);
+            printf("open an algorithm handle failed: %ld\n", hashStatus);
         }
         status = CALC_HASH_FAILED_TO_OPEN_ALG_HANDLE;
         goto Cleanup;
@@ -82,7 +82,7 @@ ErrorCode calc_hash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
     {
         if (!args->status)
         {
-            printf("hash buffer size allocation failed, err: %x\n", hashStatus);
+            printf("hash buffer size allocation failed, err: %ld\n", hashStatus);
         }
         status = CALC_HASH_FAILED_TO_ALLOCATE_HASH_BUFFER_SIZE;
         goto Cleanup;
@@ -105,7 +105,7 @@ ErrorCode calc_hash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
     {
         if (!args->status)
         {
-            printf("hash length calculation failed: %x\n", hashStatus);
+            printf("hash length calculation failed: %ld\n", hashStatus);
         }
         status = CALC_HASH_FAILED_TO_CALC_HASH_LENGTH;
         goto Cleanup;
@@ -128,7 +128,7 @@ ErrorCode calc_hash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
     {
         if (!args->status)
         {
-            printf("hash creation failed: %x\n", hashStatus);
+            printf("hash creation failed: %ld\n", hashStatus);
         }
         status = CALC_HASH_FAILED_TO_CREATE_HASH;
         goto Cleanup;
@@ -140,7 +140,7 @@ ErrorCode calc_hash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
         {
             if (!args->status)
             {
-                printf("read file failed: %d\n", GetLastError());
+                printf("read file failed: %lu\n", GetLastError());
             }
             status = CALC_HASH_FAILED_TO_READ;
             goto Cleanup;
@@ -156,7 +156,7 @@ ErrorCode calc_hash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
         {
             if (!args->status)
             {
-                printf("data hashing failed: %x\n", hashStatus);
+                printf("data hashing failed: %ld\n", hashStatus);
             }
             status = CALC_HASH_FAILED_TO_HASH;
             goto Cleanup;
@@ -168,7 +168,7 @@ ErrorCode calc_hash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
     {
         if (!args->status)
         {
-            printf("hash finalization failed: %x\n", hashStatus);
+            printf("hash finalization failed: %ld\n", hashStatus);
         }
         status = CALC_HASH_FAILED_TO_FINISH_HASH;
         goto Cleanup;
@@ -299,7 +299,7 @@ ErrorCode check_sums(__in Args* args)
     {
         if (!args->status)
         {
-            printf("failed to open file: %d\n", GetLastError());
+            printf("failed to open file: %lu\n", GetLastError());
         }
         status = CHECK_SUMS_FAILED_TO_OPEN_SUM_FILE;
         goto Cleanup;
@@ -468,7 +468,7 @@ ErrorCode check_sums(__in Args* args)
     {
         if (!args->status)
         {
-            printf("file read failed: %d\n", GetLastError());
+            printf("file read failed: %lu\n", GetLastError());
         }
         status = CHECK_SUMS_FAILED_TO_READ;
         goto Cleanup;
@@ -523,7 +523,7 @@ Cleanup:
     if (head != NULL)
     {
         current = head;
-        FileHash* next = current;
+        FileHash* next = NULL;
         while (current != NULL)
         {
             next = current->next;

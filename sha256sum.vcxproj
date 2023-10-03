@@ -186,7 +186,6 @@
     <ClCompile Include="args.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="sha256.c" />
-    <ClCompile Include="tests.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sha256sum.h" />

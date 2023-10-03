@@ -62,7 +62,16 @@ typedef struct prog_args
     BOOL text_mode;
 } Args;
 
+// this is required for CppUnitTestFramework
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 ErrorCode parse_args(__out Args*, __in int, __in LPWSTR[]);
 
 ErrorCode print_hash(__in Args* args, __in LPWSTR);
 ErrorCode check_sums(__in Args*);
+
+#ifdef __cplusplus
+}
+#endif

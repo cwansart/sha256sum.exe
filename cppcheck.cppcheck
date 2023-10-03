@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="1">
+    <builddir>cppcheck-cppcheck-build-dir</builddir>
+    <platform>win64</platform>
+    <importproject>sha256sum.sln</importproject>
+    <analyze-all-vs-configs>true</analyze-all-vs-configs>
+    <check-headers>true</check-headers>
+    <check-unused-templates>true</check-unused-templates>
+    <max-ctu-depth>2</max-ctu-depth>
+    <max-template-recursion>100</max-template-recursion>
+    <vs-configurations>
+        <config>Debug</config>
+        <config>Release</config>
+        <config>Tests</config>
+    </vs-configurations>
+    <libraries>
+        <library>windows</library>
+    </libraries>
+    <project-name>cppcheck</project-name>
+</project>

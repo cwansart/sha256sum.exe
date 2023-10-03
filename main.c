@@ -21,7 +21,7 @@ int run(int argc, LPWSTR argv[])
     // show application version
     if (args.show_version)
     {
-        wprintf(L"%ls version %ld.%ld.%ld\n", argv[0], MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION);
+        wprintf(L"%ls version %d.%d.%d\n", argv[0], MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION);
         return SUCCESS;
     }
 
@@ -49,8 +49,7 @@ int run(int argc, LPWSTR argv[])
 
             if (hFind == INVALID_HANDLE_VALUE)
             {
-                wprintf(L"failed to find files for argument '%ls' with error %d\n", current->file, GetLastError());
-                FindClose(hFind);
+                wprintf(L"failed to find files for argument '%ls' with error %lu\n", current->file, GetLastError());
                 return MAIN_FAILED_TO_FIND_FILES;
             }
 
@@ -76,10 +75,5 @@ int run(int argc, LPWSTR argv[])
 
 int wmain(int argc, LPWSTR argv[])
 {
-#ifdef _UNITTESTS
-    BOOL run_tests();
-    return run_tests();
-#else
     return run(argc, argv);
-#endif // _UNITTESTS
 }
