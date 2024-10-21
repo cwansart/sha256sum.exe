@@ -107,6 +107,8 @@ ErrorCode ParseArgs(__out Args* args, __in int argc, __in LPWSTR argv[])
             newFile->file = argv[i];
             newFile->next = NULL;
 
+
+
             if (args->files == NULL)
             {
                 args->files = newFile;

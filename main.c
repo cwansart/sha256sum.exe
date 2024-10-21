@@ -1,8 +1,9 @@
 #include "sha256sum.h"
+#include "shlwapi.h"
 
 #define MAJOR_VERSION 2
 #define MINOR_VERSION 0
-#define PATCH_VERSION 0
+#define PATCH_VERSION 2
 
 int run(int argc, LPWSTR argv[])
 {
@@ -55,7 +56,7 @@ int run(int argc, LPWSTR argv[])
 
             do
             {
-                ErrorCode printHashStatus = PrintHash(&args, findFileData.cFileName);
+                ErrorCode printHashStatus = PrintHash(&args, current->file);
                 if (printHashStatus != SUCCESS)
                 {
                     FindClose(hFind);

@@ -230,11 +230,23 @@ Cleanup:
 ErrorCode PrintHash(__in Args* args, __in LPWSTR file)
 {
     LPWSTR hash = NULL;
-    ErrorCode ok = CalcHash(args, &hash, file);
-    if (hash != NULL && ok == SUCCESS)
+    LPWSTR absPath = malloc((MAX_PATH + 1) * sizeof(wchar_t));
+    ErrorCode ok = SUCCESS;
+
+    if (GetFullPathNameW(file, MAX_PATH, absPath, NULL) == 0 || absPath == NULL)
     {
-        wprintf(L"%ls *%ls\n", hash, file);
+        ok = PARSE_ARGS_ALLOCATE_ERROR;
     }
+
+    if (ok == SUCCESS)
+    {
+        ErrorCode ok = CalcHash(args, &hash, absPath);
+        if (hash != NULL && ok == SUCCESS)
+        {
+            wprintf(L"%ls *%ls\n", hash, file);
+        }
+    }
+    free(absPath);
     return ok;
 }
 
