@@ -70,7 +70,7 @@ extern "C" {
 ErrorCode ParseArgs(__out Args*, __in int, __in LPWSTR[]);
 
 ErrorCode CalcHash(__in Args*, __out LPWSTR*, __in LPWSTR);
-ErrorCode PrintHash(__in Args*, __in LPWSTR);
+ErrorCode PrintHash(__in Args*, __in LPWSTR, __in LPWSTR);
 ErrorCode VerifyChecksums(__in Args*);
 
 #ifdef __cplusplus

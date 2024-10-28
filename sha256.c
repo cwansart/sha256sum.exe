@@ -1,6 +1,9 @@
 #pragma comment(lib, "bcrypt.lib")
 
 #include "sha256sum.h"
+#include "pathcch.h"
+#include "shlwapi.h"
+#include "strsafe.h"
 #include <bcrypt.h>
 
 #define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
@@ -227,27 +230,116 @@ Cleanup:
     return status;
 }
 
-ErrorCode PrintHash(__in Args* args, __in LPWSTR file)
+//void print(LPWSTR key, LPWSTR value)
+//{
+//    TCHAR msg[MAX_PATH];
+//    wsprintfW(msg, L"%ls: %ls\n", key, value);
+//    WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+//}
+
+TCHAR getPathSeparator(LPWSTR filePath, size_t filePathLen)
 {
-    LPWSTR hash = NULL;
-    LPWSTR absPath = malloc((MAX_PATH + 1) * sizeof(wchar_t));
-    ErrorCode ok = SUCCESS;
+    int lastSlashIndex = -1;
 
-    if (GetFullPathNameW(file, MAX_PATH, absPath, NULL) == 0 || absPath == NULL)
+    // Find the index of the last slash or backslash
+    for (int i = 0; i < filePathLen; i++)
     {
-        ok = PARSE_ARGS_ALLOCATE_ERROR;
-    }
-
-    if (ok == SUCCESS)
-    {
-        ErrorCode ok = CalcHash(args, &hash, absPath);
-        if (hash != NULL && ok == SUCCESS)
+        if (filePath[i] == L'/' || filePath[i] == L'\\')
         {
-            wprintf(L"%ls *%ls\n", hash, file);
+            return filePath[i];
         }
     }
-    free(absPath);
-    return ok;
+    return L'\\'; // return windows default if none found
+}
+
+BOOL getPathWithoutFileName(LPWSTR result, size_t resultLen, LPWSTR filePath, size_t filePathLen)
+{
+    int lastSlashIndex = -1;
+    
+    // Find the index of the last slash or backslash
+    for (int i = 0; i < filePathLen; i++)
+    {
+        if (filePath[i] == L'/' || filePath[i] == L'\\')
+        {
+            lastSlashIndex = i;
+        }
+    }
+
+    // If no path separator was found this function fails
+    if (lastSlashIndex == -1)
+    {
+        return FALSE;
+    }
+    else
+    {
+        memcpy(result, filePath, (lastSlashIndex + 1) * sizeof(TCHAR));
+        result[lastSlashIndex] = L'\0';
+    }
+    return TRUE;
+}
+
+ErrorCode PrintHash(__in Args* args, __in LPWSTR userInputFilePath, __in LPWSTR fileName)
+{
+    // get full path from user input path, remove the file and append fileName so we get
+    // a clean absolute file path
+    TCHAR absPath[MAX_PATH];
+    if (GetFullPathName(userInputFilePath, MAX_PATH, absPath, NULL) == 0 || absPath == NULL)
+    {
+        return PARSE_ARGS_ALLOCATE_ERROR; // TODO: add new error
+    }
+
+    PathCchRemoveFileSpec(absPath, MAX_PATH);
+
+    TCHAR absFilePath[MAX_PATH];
+    PathCchCombine(absFilePath, MAX_PATH, absPath, fileName);
+
+    // now calculate the file hash using the absolute file path we just constructed
+    LPWSTR hash = NULL;
+    ErrorCode ok = CalcHash(args, &hash, absFilePath);
+    if (hash != NULL && ok == SUCCESS)
+    {
+        // depending whether it is a relative or an absolute path the output needs to be different to
+        // immitade the output of sha256sum from Linux
+        BOOL isRel = PathIsRelativeW(userInputFilePath);
+        if (isRel == TRUE)
+        {
+            size_t userInputFilePathLen;
+            StringCchLengthW(userInputFilePath, MAX_PATH, &userInputFilePathLen);
+            TCHAR inputPath[MAX_PATH];
+            BOOL containsPath = getPathWithoutFileName(inputPath, MAX_PATH, userInputFilePath, userInputFilePathLen);
+
+            // if the user passed a relative file without a .\ or ..\ and other prefixes
+            if (containsPath == FALSE)
+            {
+                wprintf(L"%ls *%ls\n", hash, fileName);
+            }
+            // if the user passed a relative file with .\, ..\ and so on, we
+            // need to concatenate the inputFilePath and the given fileName
+            else
+            {
+                TCHAR inputFilePath[MAX_PATH];
+                StringCchCopyW(inputFilePath, MAX_PATH, inputPath);
+
+                TCHAR separator = getPathSeparator(userInputFilePath, userInputFilePathLen);
+                if (FAILED(StringCchCatW(inputFilePath, MAX_PATH, &separator)))
+                {
+                    return PARSE_ARGS_ALLOCATE_ERROR; // TODO: add new error
+                }
+
+                if (FAILED(StringCchCatW(inputFilePath, MAX_PATH, fileName)))
+                {
+                    return PARSE_ARGS_ALLOCATE_ERROR; // TODO: add new error
+                }
+                wprintf(L"%ls *%ls\n", hash, inputFilePath);
+            }
+        }
+        // in case of an absolute path the absolute path shall be used
+        else
+        {
+            wprintf(L"%ls *%ls\n", hash, absFilePath);
+        }
+    }
+    return SUCCESS;
 }
 
 ErrorCode ParseLine(__in Args* args, __out FileHash* fh, __in int line_num, __in LPWSTR line)

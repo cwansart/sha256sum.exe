@@ -1,5 +1,6 @@
 #include "sha256sum.h"
 #include "shlwapi.h"
+#include "pathcch.h"
 
 #define MAJOR_VERSION 2
 #define MINOR_VERSION 0
@@ -47,6 +48,16 @@ int run(int argc, LPWSTR argv[])
         {
             WIN32_FIND_DATA findFileData;
             HANDLE hFind = FindFirstFile(current->file, &findFileData);
+            
+            //PathCchRemoveFileSpec(current->file, MAX_PATH);
+            //PathRemoveFileSpec(current->file);
+            //TCHAR msg[MAX_PATH];
+            //wsprintfW(msg, L"%ls ", current->file);
+            //WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+
+            //return 0;
+            //wsprintf(L"%ls ", current->file);
+
 
             if (hFind == INVALID_HANDLE_VALUE)
             {
@@ -56,7 +67,7 @@ int run(int argc, LPWSTR argv[])
 
             do
             {
-                ErrorCode printHashStatus = PrintHash(&args, current->file);
+                ErrorCode printHashStatus = PrintHash(&args, current->file, findFileData.cFileName);
                 if (printHashStatus != SUCCESS)
                 {
                     FindClose(hFind);
