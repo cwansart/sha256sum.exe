@@ -179,15 +179,15 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="CalcHashTestFile.txt">
+    <CopyFileToFolders Include="CalcHashTestFile.txt">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
-    </Text>
-    <Text Include="ShasumFailure.txt">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="ShasumFailure.txt">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
-    </Text>
-    <Text Include="ShasumSuccess.txt">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="ShasumSuccess.txt">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
-    </Text>
+    </CopyFileToFolders>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

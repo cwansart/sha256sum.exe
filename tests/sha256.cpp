@@ -18,7 +18,7 @@ public:
         ErrorCode act = CalcHash(&args, &hash, file);
         ErrorCode exp = SUCCESS;
 
-        Assert::AreEqual((int)act, (int)exp);
+        Assert::AreEqual((int)exp, (int)act);
         Assert::AreEqual(L"5825c4a88eddd074eb3c12b23dedc0eb4d7d5f2356a61a4078a0bd3ccf69c7a1", hash);
     }
 };
@@ -36,7 +36,7 @@ public:
         ErrorCode act = VerifyChecksums(&args);
         ErrorCode exp = SUCCESS;
 
-        Assert::AreEqual((int)act, (int)exp);
+        Assert::AreEqual((int)exp, (int)act);
     }
 
     TEST_METHOD(TestFailure)
@@ -48,7 +48,7 @@ public:
         ErrorCode act = VerifyChecksums(&args);
         ErrorCode exp = CHECK_SUM_CHECKSUM_FAILED;
 
-        Assert::AreEqual((int)act, (int)exp);
+        Assert::AreEqual((int)exp, (int)act);
     }
 };
 }
