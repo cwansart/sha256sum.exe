@@ -31,14 +31,14 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ShasumFailure.txt">
+    <CopyFileToFolders Include="CalcHashTestFile.txt">
       <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="ShasumSuccess.txt">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="ShasumFailure.txt">
       <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="CalcHashTestFile.txt">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="ShasumSuccess.txt">
       <Filter>Resource Files</Filter>
-    </Text>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>
