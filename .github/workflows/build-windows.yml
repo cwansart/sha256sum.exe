@@ -1,0 +1,94 @@
+name: Build and Release
+
+on:
+  push:
+  pull_request:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: windows-2022
+    strategy:
+      matrix:
+        platform_toolset: [140, 143]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup VSTest
+        uses: Malcolmnixon/Setup-VSTest@v4
+
+      - name: Install MSVC 2015 (v140)
+        if: ${{ matrix.platform_toolset == '140' }}
+        shell: powershell
+        run: |
+          $VS_BTOOLS_EXE="vs_buildtools.exe"
+          $VS_BTOOLS_URI="https://aka.ms/vs/15/release/vs_buildtools.exe"
+          Invoke-WebRequest -Uri $VS_BTOOLS_URI -OutFile $VS_BTOOLS_EXE
+          Start-Process -FilePath ./vs_BuildTools.exe -ArgumentList `
+            "--add", "Microsoft.VisualStudio.Component.VC.140", `
+            "--quiet", "--norestart", "--force", "--wait" -Wait -PassThru
+
+      - name: Build Project
+        run: |
+          msbuild sha256sum.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v${{ matrix.platform_toolset }}
+
+      - name: Run Tests
+        run: vstest.console .\x64\Release\tests.dll
+
+      - name: Rename Executable
+        run: |
+          move .\x64\Release\sha256sum.exe .\sha256sum-msvcv${{ matrix.platform_toolset }}.exe
+
+      - name: Generate SHA256SUM
+        run: |
+          .\sha256sum-msvcv${{ matrix.platform_toolset }}.exe sha256sum-msvcv${{ matrix.platform_toolset }}.exe > SHA256SUMS
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sha256sum_v${{ matrix.platform_toolset }}
+          path: |
+            .\sha256sum-msvcv${{ matrix.platform_toolset }}.exe
+            .\SHA256SUMS
+
+  release:
+    needs: build
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Artifacts for v140
+        uses: actions/download-artifact@v4
+        with:
+          name: sha256sum_v140
+          path: v140
+
+      - name: Download Artifacts for v143
+        uses: actions/download-artifact@v4
+        with:
+          name: sha256sum_v143
+          path: v143
+
+      - name: Combine SHA256SUM Files
+        run: |
+          type v140/SHA256SUMS > SHA256SUMS
+          type v143/SHA256SUMS >> SHA256SUMS
+
+      - name: Upload Release Assets
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          fail_on_unmatched_files: true
+          files: |
+            v140/sha256sum-msvcv140.exe
+            v143/sha256sum-msvcv143.exe
+            SHA256SUMS
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
