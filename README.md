@@ -72,6 +72,10 @@ sha256sum.exe -c SHA256SUMS
 | 24   | CHECK_SUMS_FAILED_TO_ALLOCATE_FILE_HASH2      | file hash object allocation failed[2]                                      |
 | 25   | CHECK_SUMS_FAILED_TO_READ                     | failed to read from -c FILE                                                |
 | 26   | CHECK_SUM_CHECKSUM_FAILED                     | checksum verification failed                                               |
+| 27   | PRINT_HASH_FAILED_GET_FULL_PATH_NAME          | failed to determine absolute path of file                                  |
+| 28   | PRINT_HASH_FAILED_STRING_LENGTH               | failed to determine string length for printing hashes                      |
+| 29   | PRINT_HASH_FAILED_STRING_CAT1                 | failed to concatenate relative paths for printing hashes                   |
+| 30   | PRINT_HASH_FAILED_STRING_CAT2                 | failed to concatenate relative paths for printing hashes                   |
 
 [1] This should never occur. sha256sum.exe uses Microsoft's Cryptography API: Next Generation (CNG) with fixed values. If this happens the system is probably missing the CNG.
 
