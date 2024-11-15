@@ -1,5 +1,4 @@
-#include "pch.h"
-#include "CppUnitTest.h"
+#include <CppUnitTest.h>
 #include <sha256sum.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;

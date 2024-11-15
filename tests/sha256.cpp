@@ -1,5 +1,4 @@
-#include "pch.h"
-#include "CppUnitTest.h"
+#include <CppUnitTest.h>
 #include <sha256sum.h>
 #include <direct.h>
 #define GetCurrentDir _getcwd

@@ -1,9 +1,9 @@
 #pragma comment(lib, "bcrypt.lib")
 #pragma comment(lib, "Shlwapi.lib")
 
-#include "strsafe.h"
-#include "shlwapi.h"
-#include "bcrypt.h"
+#include <strsafe.h>
+#include <shlwapi.h>
+#include <bcrypt.h>
 
 #include "sha256sum.h"
 
@@ -233,8 +233,6 @@ Cleanup:
 
 TCHAR getPathSeparator(LPWSTR filePath, size_t filePathLen)
 {
-    int lastSlashIndex = -1;
-
     // Find the index of the last slash or backslash
     for (int i = 0; i < filePathLen; i++)
     {
@@ -246,7 +244,7 @@ TCHAR getPathSeparator(LPWSTR filePath, size_t filePathLen)
     return L'\\'; // return windows default if none found
 }
 
-BOOL getPathWithoutFileName(LPWSTR result, size_t resultLen, LPWSTR filePath, size_t filePathLen)
+BOOL getPathWithoutFileName(LPWSTR result, LPWSTR filePath, size_t filePathLen)
 {
     int lastSlashIndex = -1;
     
@@ -303,7 +301,7 @@ ErrorCode PrintHash(__in Args* args, __in LPWSTR userInputFilePath, __in LPWSTR 
                 return PRINT_HASH_FAILED_STRING_LENGTH;
             }
             TCHAR inputPath[MAX_PATH];
-            BOOL containsPath = getPathWithoutFileName(inputPath, MAX_PATH, userInputFilePath, userInputFilePathLen);
+            BOOL containsPath = getPathWithoutFileName(inputPath, userInputFilePath, userInputFilePathLen);
 
             // if the user passed a relative file without a .\ or ..\ and other prefixes
             if (containsPath == FALSE)
