@@ -1,10 +1,11 @@
 #pragma comment(lib, "bcrypt.lib")
+#pragma comment(lib, "Shlwapi.lib")
+
+#include "strsafe.h"
+#include "shlwapi.h"
+#include "bcrypt.h"
 
 #include "sha256sum.h"
-#include "pathcch.h"
-#include "shlwapi.h"
-#include "strsafe.h"
-#include <bcrypt.h>
 
 #define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
 #define STATUS_UNSUCCESSFUL ((NTSTATUS)0xC0000001L)
@@ -230,13 +231,6 @@ Cleanup:
     return status;
 }
 
-//void print(LPWSTR key, LPWSTR value)
-//{
-//    TCHAR msg[MAX_PATH];
-//    wsprintfW(msg, L"%ls: %ls\n", key, value);
-//    WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), msg, lstrlenW(msg), NULL, NULL);
-//}
-
 TCHAR getPathSeparator(LPWSTR filePath, size_t filePathLen)
 {
     int lastSlashIndex = -1;
@@ -283,15 +277,15 @@ ErrorCode PrintHash(__in Args* args, __in LPWSTR userInputFilePath, __in LPWSTR 
     // get full path from user input path, remove the file and append fileName so we get
     // a clean absolute file path
     TCHAR absPath[MAX_PATH];
-    if (GetFullPathName(userInputFilePath, MAX_PATH, absPath, NULL) == 0 || absPath == NULL)
+    if (GetFullPathNameW(userInputFilePath, MAX_PATH, absPath, NULL) == 0 || absPath == NULL)
     {
-        return PARSE_ARGS_ALLOCATE_ERROR; // TODO: add new error
+        return PRINT_HASH_FAILED_GET_FULL_PATH_NAME;
     }
 
-    PathCchRemoveFileSpec(absPath, MAX_PATH);
+    PathRemoveFileSpecW(absPath);
 
     TCHAR absFilePath[MAX_PATH];
-    PathCchCombine(absFilePath, MAX_PATH, absPath, fileName);
+    PathCombineW(absFilePath, absPath, fileName);
 
     // now calculate the file hash using the absolute file path we just constructed
     LPWSTR hash = NULL;
@@ -304,7 +298,10 @@ ErrorCode PrintHash(__in Args* args, __in LPWSTR userInputFilePath, __in LPWSTR 
         if (isRel == TRUE)
         {
             size_t userInputFilePathLen;
-            StringCchLengthW(userInputFilePath, MAX_PATH, &userInputFilePathLen);
+            if (FAILED(StringCchLengthW(userInputFilePath, MAX_PATH, &userInputFilePathLen)))
+            {
+                return PRINT_HASH_FAILED_STRING_LENGTH;
+            }
             TCHAR inputPath[MAX_PATH];
             BOOL containsPath = getPathWithoutFileName(inputPath, MAX_PATH, userInputFilePath, userInputFilePathLen);
 
@@ -323,12 +320,12 @@ ErrorCode PrintHash(__in Args* args, __in LPWSTR userInputFilePath, __in LPWSTR 
                 TCHAR separator = getPathSeparator(userInputFilePath, userInputFilePathLen);
                 if (FAILED(StringCchCatW(inputFilePath, MAX_PATH, &separator)))
                 {
-                    return PARSE_ARGS_ALLOCATE_ERROR; // TODO: add new error
+                    return PRINT_HASH_FAILED_STRING_CAT1;
                 }
 
                 if (FAILED(StringCchCatW(inputFilePath, MAX_PATH, fileName)))
                 {
-                    return PARSE_ARGS_ALLOCATE_ERROR; // TODO: add new error
+                    return PRINT_HASH_FAILED_STRING_CAT2;
                 }
                 wprintf(L"%ls *%ls\n", hash, inputFilePath);
             }
