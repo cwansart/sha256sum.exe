@@ -43,8 +43,8 @@ ErrorCode CalcHash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
     BCRYPT_HASH_HANDLE hHash = NULL;
     NTSTATUS hashStatus = STATUS_UNSUCCESSFUL;
     DWORD cbData = 0,
-        cbHash = 0,
-        cbHashObject = 0;
+          cbHash = 0,
+          cbHashObject = 0;
     PBYTE pbHashObject = NULL;
     PBYTE pbHash = NULL;
 
@@ -306,7 +306,9 @@ ErrorCode PrintHash(__in Args* args, __in LPWSTR userInputFilePath, __in LPWSTR 
             // if the user passed a relative file without a .\ or ..\ and other prefixes
             if (containsPath == FALSE)
             {
-                wprintf(L"%ls *%ls\n", hash, fileName);
+                wchar_t msg[MAX_PATH + 100];
+                wsprintfW(msg, L"%ls *%ls\n", hash, fileName);
+                WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), msg, lstrlenW(msg), NULL, NULL);
             }
             // if the user passed a relative file with .\, ..\ and so on, we
             // need to concatenate the inputFilePath and the given fileName
@@ -325,13 +327,18 @@ ErrorCode PrintHash(__in Args* args, __in LPWSTR userInputFilePath, __in LPWSTR 
                 {
                     return PRINT_HASH_FAILED_STRING_CAT2;
                 }
-                wprintf(L"%ls *%ls\n", hash, inputFilePath);
+
+                wchar_t msg[MAX_PATH + 100];
+                wsprintfW(msg, L"%ls *%ls\n", hash, inputFilePath);
+                WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), msg, lstrlenW(msg), NULL, NULL);
             }
         }
         // in case of an absolute path the absolute path shall be used
         else
         {
-            wprintf(L"%ls *%ls\n", hash, absFilePath);
+            wchar_t msg[MAX_PATH + 100];
+            wsprintfW(msg, L"%ls *%ls\n", hash, absFilePath);
+            WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), msg, lstrlenW(msg), NULL, NULL);
         }
     }
     return SUCCESS;

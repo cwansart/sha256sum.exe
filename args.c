@@ -6,7 +6,10 @@ void PrintUsage(__in LPWSTR prog, __in_opt LPWSTR message)
     {
         wprintf(L"%ls\n", message);
     }
-    wprintf(L"Usage: %ls [-c sha256sums_file] [file...]\n", prog);
+
+    wchar_t msg[MAX_PATH + 50];
+    wsprintfW(msg, L"Usage: %ls [-c sha256sums_file] [file...]\n", prog);
+    WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), msg, lstrlenW(msg), NULL, NULL);
 }
 
 ErrorCode ParseArgs(__out Args* args, __in int argc, __in LPWSTR argv[])

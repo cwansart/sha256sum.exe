@@ -49,7 +49,9 @@ int run(int argc, LPWSTR argv[])
 
             if (hFind == INVALID_HANDLE_VALUE)
             {
-                wprintf(L"failed to find files for argument '%ls' with error %lu\n", current->file, GetLastError());
+                wchar_t msg[MAX_PATH + 100];
+                wsprintfW(msg, L"failed to find files for argument '%ls' with error %lu\n", current->file, GetLastError());
+                WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), msg, lstrlenW(msg), NULL, NULL);
                 return MAIN_FAILED_TO_FIND_FILES;
             }
 
