@@ -64,7 +64,7 @@ ErrorCode CalcHash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
         {
             wchar_t errorMsg[MAX_PATH + 50];
             wsprintfW(errorMsg, L"failed to open file '%ls' with error: %lu\r\n", file, GetLastError());
-            WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), errorMsg, lstrlenW(errorMsg), NULL, NULL);
+            WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), errorMsg, lstrlenW(errorMsg), NULL, NULL);
         }
         status = CALC_HASH_FAILED_TO_OPEN_FILE;
         goto Cleanup;
