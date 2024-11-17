@@ -231,7 +231,7 @@ Cleanup:
     return status;
 }
 
-TCHAR getPathSeparator(LPWSTR filePath, size_t filePathLen)
+WCHAR getPathSeparator(LPWSTR filePath, size_t filePathLen)
 {
     // Find the index of the last slash or backslash
     for (int i = 0; i < filePathLen; i++)
@@ -264,7 +264,7 @@ BOOL getPathWithoutFileName(LPWSTR result, LPWSTR filePath, size_t filePathLen)
     }
     else
     {
-        memcpy(result, filePath, (lastSlashIndex + 1) * sizeof(TCHAR));
+        memcpy(result, filePath, (lastSlashIndex + 1) * sizeof(WCHAR));
         result[lastSlashIndex] = L'\0';
     }
     return TRUE;
@@ -274,7 +274,7 @@ ErrorCode PrintHash(__in Args* args, __in LPWSTR userInputFilePath, __in LPWSTR 
 {
     // get full path from user input path, remove the file and append fileName so we get
     // a clean absolute file path
-    TCHAR absPath[MAX_PATH];
+    WCHAR absPath[MAX_PATH];
     if (GetFullPathNameW(userInputFilePath, MAX_PATH, absPath, NULL) == 0 || absPath == NULL)
     {
         return PRINT_HASH_FAILED_GET_FULL_PATH_NAME;
@@ -282,7 +282,7 @@ ErrorCode PrintHash(__in Args* args, __in LPWSTR userInputFilePath, __in LPWSTR 
 
     PathRemoveFileSpecW(absPath);
 
-    TCHAR absFilePath[MAX_PATH];
+    WCHAR absFilePath[MAX_PATH];
     PathCombineW(absFilePath, absPath, fileName);
 
     // now calculate the file hash using the absolute file path we just constructed
@@ -300,24 +300,33 @@ ErrorCode PrintHash(__in Args* args, __in LPWSTR userInputFilePath, __in LPWSTR 
             {
                 return PRINT_HASH_FAILED_STRING_LENGTH;
             }
-            TCHAR inputPath[MAX_PATH];
+            WCHAR inputPath[MAX_PATH];
             BOOL containsPath = getPathWithoutFileName(inputPath, userInputFilePath, userInputFilePathLen);
 
             // if the user passed a relative file without a .\ or ..\ and other prefixes
             if (containsPath == FALSE)
             {
-                wchar_t msg[MAX_PATH + 100];
+                WCHAR msg[MAX_PATH + 100];
                 wsprintfW(msg, L"%ls *%ls\n", hash, fileName);
-                WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+                HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+                DWORD mode;
+                if (GetConsoleMode(handle, &mode))
+                {
+                    WriteConsoleW(handle, msg, lstrlenW(msg), NULL, NULL);
+                }
+                else // redirect
+                {
+                    WriteFile(handle, msg, lstrlenW(msg) * sizeof(WCHAR), NULL, NULL);
+                }
             }
             // if the user passed a relative file with .\, ..\ and so on, we
             // need to concatenate the inputFilePath and the given fileName
             else
             {
-                TCHAR inputFilePath[MAX_PATH];
+                WCHAR inputFilePath[MAX_PATH];
                 StringCchCopyW(inputFilePath, MAX_PATH, inputPath);
 
-                TCHAR separator = getPathSeparator(userInputFilePath, userInputFilePathLen);
+                WCHAR separator = getPathSeparator(userInputFilePath, userInputFilePathLen);
                 if (FAILED(StringCchCatW(inputFilePath, MAX_PATH, &separator)))
                 {
                     return PRINT_HASH_FAILED_STRING_CAT1;
@@ -328,17 +337,34 @@ ErrorCode PrintHash(__in Args* args, __in LPWSTR userInputFilePath, __in LPWSTR 
                     return PRINT_HASH_FAILED_STRING_CAT2;
                 }
 
-                wchar_t msg[MAX_PATH + 100];
+                WCHAR msg[MAX_PATH + 100];
                 wsprintfW(msg, L"%ls *%ls\n", hash, inputFilePath);
-                WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+                HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+                DWORD mode;
+                if (GetConsoleMode(handle, &mode))
+                {
+                    WriteConsoleW(handle, msg, lstrlenW(msg), NULL, NULL);
+                } else // redirect
+                {
+                    WriteFile(handle, msg, lstrlenW(msg) * sizeof(WCHAR), NULL, NULL);
+                }
             }
         }
         // in case of an absolute path the absolute path shall be used
         else
         {
-            wchar_t msg[MAX_PATH + 100];
+            WCHAR msg[MAX_PATH + 100];
             wsprintfW(msg, L"%ls *%ls\n", hash, absFilePath);
-            WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+            HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+            DWORD mode;
+            if (GetConsoleMode(handle, &mode))
+            {
+                WriteConsoleW(handle, msg, lstrlenW(msg), NULL, NULL);
+            }
+            else // redirect
+            {
+                WriteFile(handle, msg, lstrlenW(msg) * sizeof(WCHAR), NULL, NULL);
+            }
         }
     }
     return SUCCESS;
