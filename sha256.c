@@ -246,26 +246,28 @@ WCHAR getPathSeparator(LPWSTR filePath, size_t filePathLen)
 
 BOOL getPathWithoutFileName(LPWSTR result, LPWSTR filePath, size_t filePathLen)
 {
-    int lastSlashIndex = -1;
-    
-    // Find the index of the last slash or backslash
-    for (int i = 0; i < filePathLen; i++)
-    {
-        if (filePath[i] == L'/' || filePath[i] == L'\\')
-        {
-            lastSlashIndex = i;
-        }
-    }
+    LPWSTR lastSlash = wcsrchr(filePath, L'/');
+    LPWSTR lastBackslash = wcsrchr(filePath, L'\\');
 
     // If no path separator was found this function fails
-    if (lastSlashIndex == -1)
+    if (lastSlash == NULL && lastBackslash == NULL)
     {
         return FALSE;
     }
+
+    LPWSTR lastSeparator = (lastSlash > lastBackslash) ? lastSlash : lastBackslash;
+    size_t length = lastSeparator - filePath;
+
+    if (length < MAX_PATH)
+    {
+        wcsncpy_s(result, MAX_PATH, filePath, length);
+        result[length] = L'\0';  // Null-terminate the output string
+    }
     else
     {
-        memcpy(result, filePath, (lastSlashIndex + 1) * sizeof(WCHAR));
-        result[lastSlashIndex] = L'\0';
+        // Handle case where output buffer is too small
+        wcsncpy_s(result, MAX_PATH, filePath, MAX_PATH - 1);
+        result[MAX_PATH - 1] = L'\0';
     }
     return TRUE;
 }
@@ -323,14 +325,16 @@ ErrorCode PrintHash(__in Args* args, __in LPWSTR userInputFilePath, __in LPWSTR 
             // need to concatenate the inputFilePath and the given fileName
             else
             {
-                WCHAR inputFilePath[MAX_PATH];
+                WCHAR inputFilePath[MAX_PATH] = { 0 };
                 StringCchCopyW(inputFilePath, MAX_PATH, inputPath);
 
                 WCHAR separator = getPathSeparator(userInputFilePath, userInputFilePathLen);
-                if (FAILED(StringCchCatW(inputFilePath, MAX_PATH, &separator)))
+                size_t len = lstrlenW(inputFilePath);
+                if (len+1 > MAX_PATH)
                 {
                     return PRINT_HASH_FAILED_STRING_CAT1;
                 }
+                inputFilePath[len] = separator;
 
                 if (FAILED(StringCchCatW(inputFilePath, MAX_PATH, fileName)))
                 {
