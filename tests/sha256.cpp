@@ -206,4 +206,185 @@ public:
         Assert::AreEqual((int)exp, (int)act);
     }
 };
+
+TEST_CLASS(fPathRemoveFileName)
+{
+public:
+
+    TEST_METHOD(TestFileWithoutPath)
+    {
+        WCHAR path[MAX_PATH];
+        LPWSTR filePath = L"CalcHashTestFile.txt";
+
+        BOOL ret = PathRemoveFileName(path, filePath);
+
+        Assert::AreEqual(FALSE, ret);
+        Assert::AreEqual(L"", path);
+    }
+
+    TEST_METHOD(TestAbsolutePathWithBackslashes)
+    {
+        WCHAR path[MAX_PATH];
+        LPWSTR filePath = L"C:\\Program Files\\Sha256sum\\CalcHashTestFile.txt";
+
+        BOOL ret = PathRemoveFileName(path, filePath);
+
+        Assert::AreEqual(TRUE, ret);
+        Assert::AreEqual(L"C:\\Program Files\\Sha256sum", path);
+    }
+
+    TEST_METHOD(TestAbsolutePathWithSlashes)
+    {
+        WCHAR path[MAX_PATH];
+        LPWSTR filePath = L"C:/Program Files/Sha256sum/CalcHashTestFile.txt";
+
+        BOOL ret = PathRemoveFileName(path, filePath);
+
+        Assert::AreEqual(TRUE, ret);
+        Assert::AreEqual(L"C:/Program Files/Sha256sum", path);
+    }
+
+    TEST_METHOD(TestAbsolutePathWithBackslashAndParentDir)
+    {
+        WCHAR path[MAX_PATH];
+        LPWSTR filePath = L"C:\\Program Files\\Sha256sum\\..\\CalcHashTestFile.txt";
+
+        BOOL ret = PathRemoveFileName(path, filePath);
+
+        Assert::AreEqual(TRUE, ret);
+        Assert::AreEqual(L"C:\\Program Files\\Sha256sum\\..", path);
+    }
+
+    TEST_METHOD(TestAbsolutePathWithSlashAndParentDir)
+    {
+        WCHAR path[MAX_PATH];
+        LPWSTR filePath = L"C:/Program Files/Sha256sum/../CalcHashTestFile.txt";
+
+        BOOL ret = PathRemoveFileName(path, filePath);
+
+        Assert::AreEqual(TRUE, ret);
+        Assert::AreEqual(L"C:/Program Files/Sha256sum/..", path);
+    }
+
+    TEST_METHOD(TestRelativePathWithBackslash)
+    {
+        WCHAR path[MAX_PATH];
+        LPWSTR filePath = L".\\CalcHashTestFile.txt";
+
+        BOOL ret = PathRemoveFileName(path, filePath);
+
+        Assert::AreEqual(TRUE, ret);
+        Assert::AreEqual(L".", path);
+    }
+
+    TEST_METHOD(TestRelativePathWithSlash)
+    {
+        WCHAR path[MAX_PATH];
+        LPWSTR filePath = L"./CalcHashTestFile.txt";
+
+        BOOL ret = PathRemoveFileName(path, filePath);
+
+        Assert::AreEqual(TRUE, ret);
+        Assert::AreEqual(L".", path);
+    }
+
+    TEST_METHOD(TestRelativePathWithBackslashAndParentDir)
+    {
+        WCHAR path[MAX_PATH];
+        LPWSTR filePath = L".\\..\\CalcHashTestFile.txt";
+
+        BOOL ret = PathRemoveFileName(path, filePath);
+
+        Assert::AreEqual(TRUE, ret);
+        Assert::AreEqual(L".\\..", path);
+    }
+
+    TEST_METHOD(TestRelativePathWithSlashAndParentDir)
+    {
+        WCHAR path[MAX_PATH];
+        LPWSTR filePath = L"./../CalcHashTestFile.txt";
+
+        BOOL ret = PathRemoveFileName(path, filePath);
+
+        Assert::AreEqual(TRUE, ret);
+        Assert::AreEqual(L"./..", path);
+    }
+};
+
+TEST_CLASS(fPathFindSeparator)
+{
+public:
+
+    TEST_METHOD(TestPathSeparator1)
+    {
+        WCHAR sep = PathFindSeparator(L"C:/example/path/to/file.txt", 28);
+        Assert::AreEqual(L'/', sep);
+    }
+
+    TEST_METHOD(TestPathSeparator2)
+    {
+        WCHAR sep = PathFindSeparator(L"C:\\example\\path\\to\\file.txt", 29);
+        Assert::AreEqual(L'\\', sep);
+    }
+
+    TEST_METHOD(TestPathSeparator3)
+    {
+        WCHAR sep = PathFindSeparator(L"file.txt", 8);
+        Assert::AreEqual(L'\\', sep);
+    }
+
+    TEST_METHOD(TestPathSeparator4)
+    {
+        WCHAR sep = PathFindSeparator(L"C:/example\\path/to/file.txt", 29);
+        Assert::AreEqual(L'/', sep); 
+    }
+
+    TEST_METHOD(TestPathSeparator5)
+    {
+        WCHAR sep = PathFindSeparator(L"", 0);
+        Assert::AreEqual(L'\\', sep);
+    }
+
+    TEST_METHOD(TestPathSeparator6)
+    {
+        WCHAR sep = PathFindSeparator(L"file.txt", 0);
+        Assert::AreEqual(L'\\', sep);
+    }
+
+    TEST_METHOD(TestPathSeparator7)
+    {
+        WCHAR sep = PathFindSeparator(L"/", 1);
+        Assert::AreEqual(L'/', sep);
+    }
+
+    TEST_METHOD(TestPathSeparator8)
+    {
+        WCHAR sep = PathFindSeparator(L"\\", 1);
+        Assert::AreEqual(L'\\', sep);
+    }
+
+    TEST_METHOD(TestPathSeparator9)
+    {
+        WCHAR sep = PathFindSeparator(L"C:/path/to/", 12);
+        Assert::AreEqual(L'/', sep);
+    }
+
+    TEST_METHOD(TestPathSeparator10)
+    {
+        WCHAR sep = PathFindSeparator(L"examplefile.txt", 14);
+        Assert::AreEqual(L'\\', sep); 
+    }
+
+    TEST_METHOD(TestPathSeparator11)
+    {
+        WCHAR sep = PathFindSeparator(L"C:?<>|file.txt", 14);
+        Assert::AreEqual(L'\\', sep);
+    }
+
+    TEST_METHOD(TestPathSeparator12)
+    {
+        WCHAR sep = PathFindSeparator(L"//////", 6);
+        Assert::AreEqual(L'/', sep);
+    }
+};
 }

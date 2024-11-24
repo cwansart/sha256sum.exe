@@ -12,6 +12,9 @@
 
 #define HASH_LENGTH 64
 #define LINE_BUFFER_SIZE 1024
+#define MAX_PRINT_MSG_LENGTH 200
+
+WCHAR msg[1024];
 
 typedef struct file_hash_t
 {
@@ -51,20 +54,25 @@ ErrorCode CalcHash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
     RemoveBinaryPrefix(file);
 
     // open file
-    hFile = CreateFileW(file,                  // File name
-                        GENERIC_READ,          // Open for reading
-                        0,                     // No sharing
+    hFile = CreateFileW(file,
+                        GENERIC_READ,
+                        FILE_SHARE_READ,
                         NULL,                  // Default security
-                        OPEN_EXISTING,         // Existing file only
-                        FILE_ATTRIBUTE_NORMAL, // Normal file
+                        OPEN_EXISTING,
+                        FILE_ATTRIBUTE_NORMAL,
                         NULL);
     if (hFile == INVALID_HANDLE_VALUE)
     {
         if (!args->status)
         {
-            wchar_t errorMsg[MAX_PATH + 50];
-            wsprintfW(errorMsg, L"failed to open file '%ls' with error: %lu\r\n", file, GetLastError());
-            WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), errorMsg, lstrlenW(errorMsg), NULL, NULL);
+            HRESULT hr = StringCchPrintfW(msg,
+                                          _countof(msg),  // Size of buffer in characters
+                                          L"failed to open file '%ls' with error: %lu\r\n",
+                                          file, GetLastError());
+            if (SUCCEEDED(hr))
+            {
+                WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+            }
         }
         status = CALC_HASH_FAILED_TO_OPEN_FILE;
         goto Cleanup;
@@ -75,7 +83,14 @@ ErrorCode CalcHash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
     {
         if (!args->status)
         {
-            printf("open an algorithm handle failed: %ld\n", hashStatus);
+            HRESULT hr = StringCchPrintfW(msg,
+                                          _countof(msg),
+                                          L"open an algorithm handle failed: %ld\r\n",
+                                          hashStatus);
+            if (SUCCEEDED(hr))
+            {
+                WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+            }
         }
         status = CALC_HASH_FAILED_TO_OPEN_ALG_HANDLE;
         goto Cleanup;
@@ -86,7 +101,14 @@ ErrorCode CalcHash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
     {
         if (!args->status)
         {
-            printf("hash buffer size allocation failed, err: %ld\n", hashStatus);
+            HRESULT hr = StringCchPrintfW(msg,
+                                          _countof(msg),
+                                          L"hash buffer size allocation failed, err: %ld\r\n",
+                                          hashStatus);
+            if (SUCCEEDED(hr))
+            {
+                WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+            }
         }
         status = CALC_HASH_FAILED_TO_ALLOCATE_HASH_BUFFER_SIZE;
         goto Cleanup;
@@ -98,7 +120,13 @@ ErrorCode CalcHash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
     {
         if (!args->status)
         {
-            printf("memory allocation for hash object failed\n");
+            HRESULT hr = StringCchPrintfW(msg,
+                                          _countof(msg),
+                                          L"memory allocation for hash object failed\r\n");
+            if (SUCCEEDED(hr))
+            {
+                WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+            }
         }
         status = CALC_HASH_FAILED_TO_ALLOCATE_HASH_OBJECT;
         goto Cleanup;
@@ -109,7 +137,14 @@ ErrorCode CalcHash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
     {
         if (!args->status)
         {
-            printf("hash length calculation failed: %ld\n", hashStatus);
+            HRESULT hr = StringCchPrintfW(msg,
+                                          _countof(msg),
+                                          L"hash length calculation failed: %ld\r\n",
+                                          hashStatus);
+            if (SUCCEEDED(hr))
+            {
+                WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+            }
         }
         status = CALC_HASH_FAILED_TO_CALC_HASH_LENGTH;
         goto Cleanup;
@@ -121,7 +156,13 @@ ErrorCode CalcHash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
     {
         if (!args->status)
         {
-            printf("memory allocation for hash buffer failed\n");
+            HRESULT hr = StringCchPrintfW(msg,
+                                          _countof(msg),
+                                          L"memory allocation for hash buffer failed\r\n");
+            if (SUCCEEDED(hr))
+            {
+                WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+            }
         }
         status = CALC_HASH_FAILED_TO_ALLOCATE_HASH_BUFFER;
         goto Cleanup;
@@ -132,7 +173,14 @@ ErrorCode CalcHash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
     {
         if (!args->status)
         {
-            printf("hash creation failed: %ld\n", hashStatus);
+            HRESULT hr = StringCchPrintfW(msg,
+                                          _countof(msg),
+                                          L"hash creation failed: %ld\r\n",
+                                          hashStatus);
+            if (SUCCEEDED(hr))
+            {
+                WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+            }
         }
         status = CALC_HASH_FAILED_TO_CREATE_HASH;
         goto Cleanup;
@@ -144,7 +192,14 @@ ErrorCode CalcHash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
         {
             if (!args->status)
             {
-                printf("read file failed: %lu\n", GetLastError());
+                HRESULT hr = StringCchPrintfW(msg,
+                                              _countof(msg),
+                                              L"read file failed: %lu\r\n",
+                                              GetLastError());
+                if (SUCCEEDED(hr))
+                {
+                    WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+                }
             }
             status = CALC_HASH_FAILED_TO_READ;
             goto Cleanup;
@@ -160,7 +215,14 @@ ErrorCode CalcHash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
         {
             if (!args->status)
             {
-                printf("data hashing failed: %ld\n", hashStatus);
+                HRESULT hr = StringCchPrintfW(msg,
+                                              _countof(msg),
+                                              L"data hashing failed: %ld\r\n",
+                                              hashStatus);
+                if (SUCCEEDED(hr))
+                {
+                    WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+                }
             }
             status = CALC_HASH_FAILED_TO_HASH;
             goto Cleanup;
@@ -172,7 +234,14 @@ ErrorCode CalcHash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
     {
         if (!args->status)
         {
-            printf("hash finalization failed: %ld\n", hashStatus);
+            HRESULT hr = StringCchPrintfW(msg,
+                                          _countof(msg),
+                                          L"hash finalization failed: %ld\r\n",
+                                          hashStatus);
+            if (SUCCEEDED(hr))
+            {
+                WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+            }
         }
         status = CALC_HASH_FAILED_TO_FINISH_HASH;
         goto Cleanup;
@@ -184,7 +253,13 @@ ErrorCode CalcHash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
     {
         if (!args->status)
         {
-            printf("memory allocation for file hash failed\n");
+            HRESULT hr = StringCchPrintfW(msg,
+                                          _countof(msg),
+                                          L"memory allocation for file hash failed\r\n");
+            if (SUCCEEDED(hr))
+            {
+                WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+            }
         }
         status = CALC_HASH_FAILED_TO_ALLOCATE_FILE_HASH;
         goto Cleanup;
@@ -192,9 +267,8 @@ ErrorCode CalcHash(__in Args* args, __out LPWSTR* file_hash, __in LPWSTR file)
 
     for (DWORD i = 0; i < cbHash; i++)
     {
-        swprintf_s((*file_hash) + i * 2, 3, L"%02x", pbHash[i]);
+        StringCchPrintfW((*file_hash) + i * 2, 3, L"%02x", pbHash[i]);
     }
-    (*file_hash)[cbHash * 2] = L'\0';
 
 Cleanup:
 
@@ -231,45 +305,20 @@ Cleanup:
     return status;
 }
 
-WCHAR getPathSeparator(LPWSTR filePath, size_t filePathLen)
+void WriteFileUTF8(__in HANDLE handle, __in LPWSTR msg)
 {
-    // Find the index of the last slash or backslash
-    for (int i = 0; i < filePathLen; i++)
+    int utf8Size = WideCharToMultiByte(CP_UTF8, 0, msg, -1, NULL, 0, NULL, NULL);
+    if (utf8Size > 0)
     {
-        if (filePath[i] == L'/' || filePath[i] == L'\\')
+        LPSTR utf8Msg = (LPSTR)malloc(utf8Size);
+        if (utf8Msg)
         {
-            return filePath[i];
+            // convert UTF-16 to UTF-8
+            WideCharToMultiByte(CP_UTF8, 0, msg, -1, utf8Msg, utf8Size, NULL, NULL);
+            WriteFile(handle, utf8Msg, utf8Size - 1, NULL, NULL); // -1, um das Nullterminierungszeichen nicht zu schreiben
+            free(utf8Msg);
         }
     }
-    return L'\\'; // return windows default if none found
-}
-
-BOOL getPathWithoutFileName(LPWSTR result, LPWSTR filePath, size_t filePathLen)
-{
-    LPWSTR lastSlash = wcsrchr(filePath, L'/');
-    LPWSTR lastBackslash = wcsrchr(filePath, L'\\');
-
-    // If no path separator was found this function fails
-    if (lastSlash == NULL && lastBackslash == NULL)
-    {
-        return FALSE;
-    }
-
-    LPWSTR lastSeparator = (lastSlash > lastBackslash) ? lastSlash : lastBackslash;
-    size_t length = lastSeparator - filePath;
-
-    if (length < MAX_PATH)
-    {
-        wcsncpy_s(result, MAX_PATH, filePath, length);
-        result[length] = L'\0';  // Null-terminate the output string
-    }
-    else
-    {
-        // Handle case where output buffer is too small
-        wcsncpy_s(result, MAX_PATH, filePath, MAX_PATH - 1);
-        result[MAX_PATH - 1] = L'\0';
-    }
-    return TRUE;
 }
 
 ErrorCode PrintHash(__in Args* args, __in LPWSTR userInputFilePath, __in LPWSTR fileName)
@@ -303,13 +352,19 @@ ErrorCode PrintHash(__in Args* args, __in LPWSTR userInputFilePath, __in LPWSTR 
                 return PRINT_HASH_FAILED_STRING_LENGTH;
             }
             WCHAR inputPath[MAX_PATH];
-            BOOL containsPath = getPathWithoutFileName(inputPath, userInputFilePath, userInputFilePathLen);
+            BOOL containsPath = PathRemoveFileName(inputPath, userInputFilePath);
 
             // if the user passed a relative file without a .\ or ..\ and other prefixes
             if (containsPath == FALSE)
             {
-                WCHAR msg[MAX_PATH + 100];
-                wsprintfW(msg, L"%ls *%ls\n", hash, fileName);
+                HRESULT hr = StringCchPrintfW(msg,
+                                              _countof(msg),
+                                              L"%ls *%ls\r\n",
+                                              hash, fileName);
+                if (FAILED(hr))
+                {
+                    return PRINT_HASH_FAILED_STRING_CAT3;
+                }
                 HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
                 DWORD mode;
                 if (GetConsoleMode(handle, &mode))
@@ -318,7 +373,7 @@ ErrorCode PrintHash(__in Args* args, __in LPWSTR userInputFilePath, __in LPWSTR 
                 }
                 else // redirect
                 {
-                    WriteFile(handle, msg, lstrlenW(msg) * sizeof(WCHAR), NULL, NULL);
+                    WriteFileUTF8(handle, msg);
                 }
             }
             // if the user passed a relative file with .\, ..\ and so on, we
@@ -328,7 +383,7 @@ ErrorCode PrintHash(__in Args* args, __in LPWSTR userInputFilePath, __in LPWSTR 
                 WCHAR inputFilePath[MAX_PATH] = { 0 };
                 StringCchCopyW(inputFilePath, MAX_PATH, inputPath);
 
-                WCHAR separator = getPathSeparator(userInputFilePath, userInputFilePathLen);
+                WCHAR separator = PathFindSeparator(userInputFilePath, userInputFilePathLen);
                 size_t len = lstrlenW(inputFilePath);
                 if (len+1 > MAX_PATH)
                 {
@@ -341,8 +396,14 @@ ErrorCode PrintHash(__in Args* args, __in LPWSTR userInputFilePath, __in LPWSTR 
                     return PRINT_HASH_FAILED_STRING_CAT2;
                 }
 
-                WCHAR msg[MAX_PATH + 100];
-                wsprintfW(msg, L"%ls *%ls\n", hash, inputFilePath);
+                HRESULT hr = StringCchPrintfW(msg,
+                                              _countof(msg),
+                                              L"%ls *%ls\r\n",
+                                              hash, inputFilePath);
+                if (FAILED(hr))
+                {
+                    return PRINT_HASH_FAILED_STRING_CAT4;
+                }
                 HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
                 DWORD mode;
                 if (GetConsoleMode(handle, &mode))
@@ -350,15 +411,21 @@ ErrorCode PrintHash(__in Args* args, __in LPWSTR userInputFilePath, __in LPWSTR 
                     WriteConsoleW(handle, msg, lstrlenW(msg), NULL, NULL);
                 } else // redirect
                 {
-                    WriteFile(handle, msg, lstrlenW(msg) * sizeof(WCHAR), NULL, NULL);
+                    WriteFileUTF8(handle, msg);
                 }
             }
         }
         // in case of an absolute path the absolute path shall be used
         else
         {
-            WCHAR msg[MAX_PATH + 100];
-            wsprintfW(msg, L"%ls *%ls\n", hash, absFilePath);
+            HRESULT hr = StringCchPrintfW(msg,
+                                          _countof(msg),
+                                          L"%ls *%ls\r\n",
+                                          hash, absFilePath);
+            if (FAILED(hr))
+            {
+                return PRINT_HASH_FAILED_STRING_CAT5;
+            }
             HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
             DWORD mode;
             if (GetConsoleMode(handle, &mode))
@@ -367,7 +434,7 @@ ErrorCode PrintHash(__in Args* args, __in LPWSTR userInputFilePath, __in LPWSTR 
             }
             else // redirect
             {
-                WriteFile(handle, msg, lstrlenW(msg) * sizeof(WCHAR), NULL, NULL);
+                WriteFileUTF8(handle, msg);
             }
         }
     }
@@ -384,7 +451,14 @@ ErrorCode ParseLine(__in Args* args, __out FileHash* fh, __in int line_num, __in
     {
         if (!args->status && args->warn)
         {
-            printf("invalid hash on line %d\n", line_num);
+            HRESULT hr = StringCchPrintfW(msg,
+                                          _countof(msg),
+                                          L"invalid hash on line %d\r\n",
+                                          line_num);
+            if (SUCCEEDED(hr))
+            {
+                WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+            }
         }
         return PARSE_LINE_INVALID_HASH_TOKEN;
     }
@@ -393,7 +467,14 @@ ErrorCode ParseLine(__in Args* args, __out FileHash* fh, __in int line_num, __in
     {
         if (!args->status && args->warn)
         {
-            printf("invalid hash on line %d\n", line_num);
+            HRESULT hr = StringCchPrintfW(msg,
+                                          _countof(msg),
+                                          L"invalid hash on line %d\r\n",
+                                          line_num);
+            if (SUCCEEDED(hr))
+            {
+                WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+            }
         }
         return PARSE_LINE_INVALID_HASH_LENGTH;
     }
@@ -403,12 +484,44 @@ ErrorCode ParseLine(__in Args* args, __out FileHash* fh, __in int line_num, __in
     {
         if (!args->status && args->warn)
         {
-            printf("invalid file on line %d\n", line_num);
+            HRESULT hr = StringCchPrintfW(msg,
+                                          _countof(msg),
+                                          L"invalid hash on line %d\r\n",
+                                          line_num);
+            if (SUCCEEDED(hr))
+            {
+                WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+            }
         }
         return PARSE_LINE_INAVLID_FILE;
     }
 
     return SUCCESS;
+}
+
+BOOL IsUTF16File(LPCWSTR filePath)
+{
+    BOOL isUTF16 = FALSE;
+    HANDLE hFile = CreateFileW(filePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    if (hFile != INVALID_HANDLE_VALUE)
+    {
+        BYTE bom[2];
+        DWORD bytesRead;
+
+        if (ReadFile(hFile, bom, sizeof(bom), &bytesRead, NULL))
+        {
+            // check for UTF-16 header
+            if ((bom[0] == 0xFF && bom[1] == 0xFE) || (bom[0] == 0xFE && bom[1] == 0xFF))
+            {
+                isUTF16 = TRUE;
+            }
+        }
+
+        CloseHandle(hFile);
+    }
+
+    return isUTF16;
 }
 
 ErrorCode VerifyChecksums(__in Args* args)
@@ -423,10 +536,16 @@ ErrorCode VerifyChecksums(__in Args* args)
     FileHash* head = NULL;
     FileHash* current = NULL;
 
+    BOOL isUTF16 = IsUTF16File(args->sumFile);
+    if (isUTF16)
+    {
+        return CHECK_SUMS_FAILED_UNSUPPORTED_UTF_16;
+    }
+
     // open file
-    hFile = CreateFileW(args->sumFile,        // File name
+    hFile = CreateFileW(args->sumFile,         // File name
                         GENERIC_READ,          // Open for reading
-                        0,                     // No sharing
+                        FILE_SHARE_READ,       // No sharing
                         NULL,                  // Default security
                         OPEN_EXISTING,         // Existing file only
                         FILE_ATTRIBUTE_NORMAL, // Normal file
@@ -435,7 +554,14 @@ ErrorCode VerifyChecksums(__in Args* args)
     {
         if (!args->status)
         {
-            printf("failed to open file: %lu\n", GetLastError());
+            HRESULT hr = StringCchPrintfW(msg,
+                                          _countof(msg),
+                                          L"failed to open file: %lu\r\n",
+                                          GetLastError());
+            if (SUCCEEDED(hr))
+            {
+                WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+            }
         }
         status = CHECK_SUMS_FAILED_TO_OPEN_SUM_FILE;
         goto Cleanup;
@@ -455,7 +581,14 @@ ErrorCode VerifyChecksums(__in Args* args)
                 {
                     if (!args->status)
                     {
-                        printf("line %d too long, max size: %d\n", lineNum, LINE_BUFFER_SIZE);
+                        HRESULT hr = StringCchPrintfW(msg,
+                                                      _countof(msg),
+                                                      L"line %d too long, max size: %du\r\n",
+                                                      lineNum, LINE_BUFFER_SIZE);
+                        if (SUCCEEDED(hr))
+                        {
+                            WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+                        }
                     }
                     status = CHECK_SUMS_LINE_TOO_LONG;
                     goto Cleanup;
@@ -477,7 +610,14 @@ ErrorCode VerifyChecksums(__in Args* args)
                 {
                     if (!args->status)
                     {
-                        printf("failed to allocate memory for wideBuffer1 for line %d\n", lineNum);
+                        HRESULT hr = StringCchPrintfW(msg,
+                                                      _countof(msg),
+                                                      L"failed to allocate memory for wideBuffer1 for line %d\r\n",
+                                                      lineNum);
+                        if (SUCCEEDED(hr))
+                        {
+                            WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+                        }
                     }
                     status = CHECK_SUMS_FAILED_TO_ALLOCATE_WIDE_BUFFER1;
                     goto Cleanup;
@@ -490,7 +630,14 @@ ErrorCode VerifyChecksums(__in Args* args)
                 {
                     if (!args->status)
                     {
-                        printf("failed to allocate memory for fh1 for line %d\n", lineNum);
+                        HRESULT hr = StringCchPrintfW(msg,
+                                                      _countof(msg),
+                                                      L"failed to allocate memory for fh1 for line %d\r\n",
+                                                      lineNum);
+                        if (SUCCEEDED(hr))
+                        {
+                            WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+                        }
                     }
                     status = CHECK_SUMS_FAILED_TO_ALLOCATE_FILE_HASH1;
                     goto Cleanup;
@@ -501,7 +648,14 @@ ErrorCode VerifyChecksums(__in Args* args)
                 {
                     if (!args->status)
                     {
-                        printf("skip empty line %d\n", lineNum);
+                        HRESULT hr = StringCchPrintfW(msg,
+                                                      _countof(msg),
+                                                      L"skip empty line %d\r\n",
+                                                      lineNum);
+                        if (SUCCEEDED(hr))
+                        {
+                            WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+                        }
                     }
                     free(fh);
                 }
@@ -549,7 +703,14 @@ ErrorCode VerifyChecksums(__in Args* args)
         {
             if (!args->status)
             {
-                printf("failed to allocate memory for wideBuffer2 for line %d\n", lineNum);
+                HRESULT hr = StringCchPrintfW(msg,
+                                              _countof(msg),
+                                              L"failed to allocate memory for wideBuffer2 for line %d\r\n",
+                                              lineNum);
+                if (SUCCEEDED(hr))
+                {
+                    WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+                }
             }
             status = CHECK_SUMS_FAILED_TO_ALLOCATE_WIDE_BUFFER2;
             goto Cleanup;
@@ -562,7 +723,14 @@ ErrorCode VerifyChecksums(__in Args* args)
         {
             if (!args->status)
             {
-                printf("failed to allocate memory for fh2 for line %d\n", lineNum);
+                HRESULT hr = StringCchPrintfW(msg,
+                                              _countof(msg),
+                                              L"failed to allocate memory for fh2 for line %d\r\n",
+                                              lineNum);
+                if (SUCCEEDED(hr))
+                {
+                    WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+                }
             }
             status = CHECK_SUMS_FAILED_TO_ALLOCATE_FILE_HASH2;
             goto Cleanup;
@@ -573,7 +741,14 @@ ErrorCode VerifyChecksums(__in Args* args)
         {
             if (!args->status)
             {
-                printf("skip empty line %d\n", lineNum);
+                HRESULT hr = StringCchPrintfW(msg,
+                                              _countof(msg),
+                                              L"skip empty line %d\r\n",
+                                              lineNum);
+                if (SUCCEEDED(hr))
+                {
+                    WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+                }
             }
         }
         else
@@ -604,7 +779,14 @@ ErrorCode VerifyChecksums(__in Args* args)
     {
         if (!args->status)
         {
-            printf("file read failed: %lu\n", GetLastError());
+            HRESULT hr = StringCchPrintfW(msg,
+                                          _countof(msg),
+                                          L"file read failed: %lu\r\n",
+                                          GetLastError());
+            if (SUCCEEDED(hr))
+            {
+                WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+            }
         }
         status = CHECK_SUMS_FAILED_TO_READ;
         goto Cleanup;
@@ -621,21 +803,32 @@ ErrorCode VerifyChecksums(__in Args* args)
             goto Cleanup;
         }
 
-        wchar_t msg[MAX_PATH + 20];
         if (wcscmp(current->hash, file_hash) == 0)
         {
             if (!args->status && !args->quiet)
             {
-                wsprintfW(msg, L"%ls: OK\r\n", current->file);
-                WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+                HRESULT hr = StringCchPrintfW(msg,
+                                              _countof(msg),
+                                              L"%ls: OK\r\n",
+                                              current->file);
+                if (SUCCEEDED(hr))
+                {
+                    WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+                }
             }
         }
         else
         {
             if (!args->status)
             {
-                wsprintfW(msg, L"%ls: FAILED\r\n", current->file);
-                WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+                HRESULT hr = StringCchPrintfW(msg,
+                                              _countof(msg),
+                                              L"%ls: FAILED\r\n", 
+                                              current->file);
+                if (SUCCEEDED(hr))
+                {
+                    WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+                }
             }
             status = CHECK_SUM_CHECKSUM_FAILED;
         }
@@ -645,8 +838,13 @@ ErrorCode VerifyChecksums(__in Args* args)
 
     if (!args->status && status == CHECK_SUM_CHECKSUM_FAILED)
     {
-        LPWSTR msg = L"checksum failed\r\n";
-        WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+        HRESULT hr = StringCchPrintfW(msg,
+                                      _countof(msg),
+                                      L"checksum failed\r\n");
+        if (SUCCEEDED(hr))
+        {
+            WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), msg, lstrlenW(msg), NULL, NULL);
+        }
     }
 
 Cleanup:
@@ -669,4 +867,34 @@ Cleanup:
     }
 
     return status;
+}
+
+WCHAR PathFindSeparator(__in LPWSTR filePath, __in size_t filePathLen)
+{
+    for (size_t i = 0; i < filePathLen; i++)
+    {
+        if (filePath[i] == L'/' || filePath[i] == L'\\')
+        {
+            return filePath[i];
+        }
+    }
+    return L'\\'; // return windows default if none found
+}
+
+BOOL PathRemoveFileName(__out_ecount(MAX_PATH) LPWSTR dst, __in LPWSTR src)
+{
+    LPWSTR lastSlash = wcsrchr(src, L'/');
+    LPWSTR lastBackslash = wcsrchr(src, L'\\');
+
+    // If no path separator was found this function fails
+    if (lastSlash == NULL && lastBackslash == NULL)
+    {
+        StringCchCopyW(dst, MAX_PATH, L"");
+        return FALSE;
+    }
+
+    LPWSTR lastSeparator = (lastSlash > lastBackslash) ? lastSlash : lastBackslash;
+    size_t length = lastSeparator - src;
+    HRESULT hr = StringCchCopyNW(dst, length + 1, src, length);
+    return SUCCEEDED(hr) ? TRUE : FALSE;
 }
