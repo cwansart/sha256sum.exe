@@ -21,7 +21,7 @@ ErrorCode ParseArgs(__out Args* args, __in int argc, __in LPWSTR argv[])
     args->files = NULL;
     args->sumFile = NULL;
     args->quiet = FALSE;
-    args->status = TRUE;
+    args->status = FALSE;
     args->warn = FALSE;
     args->showVersion = FALSE;
     args->textMode = FALSE;
