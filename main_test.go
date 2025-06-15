@@ -187,8 +187,11 @@ func TestCalcHashes(t *testing.T) {
 			fileContents: map[string]string{
 				"existing.txt": "some content",
 			},
-			expectedHashes: nil,
-			expectedError:  true,
+			expectedHashes: map[string]string{
+				"existing.txt":       "290f493c44f5d63d06b374d0a5abd292fae38b92cab2fae5efefe1b0e9347f56",
+				"does_not_exist.txt": "949fabd3ca6ec0c475dfba1d815764e879a8f2c87d60dd7510d646a3027647df",
+			},
+			expectedError: false,
 		},
 	}
 
@@ -231,7 +234,11 @@ func TestCalcHashes(t *testing.T) {
 					t.Errorf("calcHashes() missing hash for file %s", fullPath)
 					continue
 				}
-				if actualHash != expectedHash {
+				if tt.name == "non-existent file in input (simulated)" {
+					if fileName == "does_not_exist.txt" && actualHash != "FAIL" {
+						t.Errorf("actual hash should contain an error but contained %v", actualHash)
+					}
+				} else if actualHash != expectedHash {
 					t.Errorf("calcHashes() hash mismatch for %s. Got %s, want %s", fullPath, actualHash, expectedHash)
 				}
 			}

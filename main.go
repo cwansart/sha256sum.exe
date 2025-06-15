@@ -122,9 +122,8 @@ func calcHashes(files []string) (map[string]string, error) {
 	for _, filePath := range files {
 		file, err := os.Open(filePath)
 		if err != nil {
-			msg := fmt.Sprintf("failed to open file: %v", err)
-			fmt.Fprintln(os.Stderr, msg)
-			hashes[filePath] = msg
+			fmt.Fprintf(os.Stderr, "failed to open file: %v", err)
+			hashes[filePath] = "FAIL"
 			continue
 		}
 
