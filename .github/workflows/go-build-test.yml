@@ -1,0 +1,38 @@
+name: Go Build and Test
+
+on:
+  push:
+    branches:
+      - go_port
+  pull_request:
+    branches:
+      - go_port
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24'
+
+    - name: Run tests (optional)
+      run: go test -v ./...
+
+    - name: Build Windows Executable
+      run: go build -o sha256sum.exe -ldflags="-s -w" .
+      env:
+        GOOS: windows
+        GOARCH: amd64
+        CGO_ENABLED: 0
+
+    - name: Upload Windows Executable
+      uses: actions/upload-artifact@v4
+      with:
+        name: sha256sum-windows-amd64
+        path: sha256sum.exe

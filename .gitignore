@@ -1,5 +1,4 @@
-*.obj
-*.exe
-x64/
-.vs/
-*.vcxproj.user
+sha256sum.exe
+SHA256SUMS
+cover.out
+cover.html
