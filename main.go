@@ -33,9 +33,7 @@ func main() {
 
 	args := flag.Args()
 	if len(args) == 0 && mode == MODE_CALC_HASHES {
-		binName := filepath.Base(os.Args[0])
-		fmt.Println("too few arguments")
-		fmt.Printf("Usage: %v [-c sha256sums_file] [file...]\n", binName)
+		flag.Usage()
 		os.Exit(0)
 	}
 
@@ -45,11 +43,11 @@ func main() {
 		err = modeCalcHashes(args)
 
 	case MODE_CHECK_HASHES:
-		err = modeCeckHashes(checkFlag)
+		err = modeCheckHashes(checkFlag)
 	}
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
@@ -71,7 +69,7 @@ func modeCalcHashes(args []string) error {
 	return nil
 }
 
-func modeCeckHashes(checkFlag *string) error {
+func modeCheckHashes(checkFlag *string) error {
 	expectedHashes, err := readShasumsFile(*checkFlag)
 	if err != nil {
 		return err
@@ -121,19 +119,18 @@ func resolveFiles(args []string) ([]string, error) {
 
 func calcHashes(files []string) (map[string]string, error) {
 	hashes := make(map[string]string)
-
 	for _, filePath := range files {
 		file, err := os.Open(filePath)
 		if err != nil {
 			return nil, err
 		}
-		defer file.Close()
 
 		hasher := sha256.New()
-
 		if _, err := io.Copy(hasher, file); err != nil {
+			file.Close()
 			return nil, fmt.Errorf("failed to hash file: %v", err)
 		}
+		file.Close()
 
 		hashBytes := hasher.Sum(nil)
 		hashStr := hex.EncodeToString(hashBytes)
