@@ -122,7 +122,10 @@ func calcHashes(files []string) (map[string]string, error) {
 	for _, filePath := range files {
 		file, err := os.Open(filePath)
 		if err != nil {
-			return nil, err
+			msg := fmt.Sprintf("failed to open file: %v", err)
+			fmt.Fprintln(os.Stderr, msg)
+			hashes[filePath] = msg
+			continue
 		}
 
 		hasher := sha256.New()
@@ -170,7 +173,7 @@ func readShasumsFile(shasumsfilePath string) (map[string]string, error) {
 				(r >= 'a' && r <= 'f') ||
 				(r >= 'A' && r <= 'F'))
 		})
-		filePath := strings.TrimFunc(parts[1], func(r rune) bool { return !unicode.IsGraphic(r) || unicode.IsSpace(r) })
+		filePath := strings.TrimFunc(parts[1], func(r rune) bool { return !unicode.IsGraphic(r) || unicode.IsSpace(r) || r == '*' })
 
 		if hashLen := utf8.RuneCountInString(hash); hashLen != 64 {
 			fmt.Printf("skipping line %v, invalid hash length, expected 64, got %v, hash: %v\n", lineNum, hashLen, hash)
