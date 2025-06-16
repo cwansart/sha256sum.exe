@@ -268,6 +268,14 @@ func TestReadShasumsFile(t *testing.T) {
 			expectError: false,
 		},
 		{
+			name:        "upper case hash",
+			fileContent: "6A2BF854FFB0D7D8E411BF9087595E1E1948574765D770C8C078832A82645E5B  valid_file.txt",
+			expectedHashes: map[string]string{
+				"valid_file.txt": "6a2bf854ffb0d7d8e411bf9087595e1e1948574765d770c8c078832a82645e5b",
+			},
+			expectError: false,
+		},
+		{
 			name:           "empty file",
 			fileContent:    "",
 			expectedHashes: map[string]string{},

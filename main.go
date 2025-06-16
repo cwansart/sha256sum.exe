@@ -172,6 +172,7 @@ func readShasumsFile(shasumsfilePath string) (map[string]string, error) {
 				(r >= 'a' && r <= 'f') ||
 				(r >= 'A' && r <= 'F'))
 		})
+		hash = strings.ToLower(hash)
 		filePath := strings.TrimFunc(parts[1], func(r rune) bool { return !unicode.IsGraphic(r) || unicode.IsSpace(r) || r == '*' })
 
 		if hashLen := utf8.RuneCountInString(hash); hashLen != 64 {
