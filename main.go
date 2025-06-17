@@ -64,7 +64,7 @@ func modeCalcHashes(args []string) error {
 	}
 
 	for filePath, hash := range hashes {
-		fmt.Printf("%v  %v\n", hash, filePath)
+		fmt.Printf("%v  %v%v", hash, filePath, NL)
 	}
 	return nil
 }
@@ -90,7 +90,7 @@ func modeCheckHashes(checkFlag *string) error {
 		if expectedHashes[filePath] != hash {
 			status = "NOT OK"
 		}
-		fmt.Printf("%v: %v\n", filePath, status)
+		fmt.Printf("%v: %v%v", filePath, status, NL)
 	}
 
 	return nil
@@ -157,13 +157,13 @@ func readShasumsFile(shasumsfilePath string) (map[string]string, error) {
 		line := strings.TrimSpace(scanner.Text())
 
 		if line == "" {
-			fmt.Printf("skipping empty line %v\n", lineNum)
+			fmt.Printf("skipping empty line %v%v", lineNum, NL)
 			continue
 		}
 
 		parts := strings.SplitN(line, " ", 2)
 		if len(parts) != 2 {
-			fmt.Printf("skipping unknown line %v\n", lineNum)
+			fmt.Printf("skipping unknown line %v%v", lineNum, NL)
 			continue
 		}
 
@@ -176,7 +176,7 @@ func readShasumsFile(shasumsfilePath string) (map[string]string, error) {
 		filePath := strings.TrimFunc(parts[1], func(r rune) bool { return !unicode.IsGraphic(r) || unicode.IsSpace(r) || r == '*' })
 
 		if hashLen := utf8.RuneCountInString(hash); hashLen != 64 {
-			fmt.Printf("skipping line %v, invalid hash length, expected 64, got %v, hash: %v\n", lineNum, hashLen, hash)
+			fmt.Printf("skipping line %v, invalid hash length, expected 64, got %v, hash: %v%v", lineNum, hashLen, hash, NL)
 			continue
 		}
 
