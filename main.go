@@ -37,17 +37,22 @@ func main() {
 		os.Exit(0)
 	}
 
+	ok := true
 	var err error
 	switch mode {
 	case MODE_CALC_HASHES:
 		err = modeCalcHashes(args)
 
 	case MODE_CHECK_HASHES:
-		err = modeCheckHashes(checkFlag)
+		ok, err = modeCheckHashes(checkFlag)
 	}
 
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+
+	if !ok {
 		os.Exit(1)
 	}
 }
@@ -69,10 +74,10 @@ func modeCalcHashes(args []string) error {
 	return nil
 }
 
-func modeCheckHashes(checkFlag *string) error {
+func modeCheckHashes(checkFlag *string) (bool, error) {
 	expectedHashes, err := readShasumsFile(*checkFlag)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	filePaths := make([]string, 0, len(expectedHashes))
@@ -82,18 +87,21 @@ func modeCheckHashes(checkFlag *string) error {
 
 	hashes, err := calcHashes(filePaths)
 	if err != nil {
-		return err
+		return false, err
 	}
 
+	allOK := true
 	for filePath, hash := range hashes {
 		status := "OK"
 		if expectedHashes[filePath] != hash {
-			status = "NOT OK"
+			status = "FAILED"
+		} else {
+			allOK = false
 		}
 		fmt.Printf("%v: %v%v", filePath, status, NL)
 	}
 
-	return nil
+	return allOK, nil
 }
 
 func resolveFiles(args []string) ([]string, error) {
